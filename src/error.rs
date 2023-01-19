@@ -1,4 +1,5 @@
 use confy::ConfyError;
+use gitlab::{api::projects::merge_requests::MergeRequestChangesBuilderError, GitlabError};
 
 use std::error;
 use std::fmt;
@@ -8,6 +9,9 @@ pub enum Error {
     ConfigurationError(ConfyError),
     ErrorParsingCliValue(std::num::ParseIntError),
     WriteError(std::io::Error),
+    UnableToCreateClient(GitlabError),
+    BuilderError(MergeRequestChangesBuilderError),
+    EndPointError,
 }
 
 impl fmt::Display for Error {
@@ -31,6 +35,18 @@ impl From<std::num::ParseIntError> for Error {
 impl From<std::io::Error> for Error {
     fn from(value: std::io::Error) -> Self {
         Self::WriteError(value)
+    }
+}
+
+impl From<GitlabError> for Error {
+    fn from(value: GitlabError) -> Self {
+        Self::UnableToCreateClient(value)
+    }
+}
+
+impl From<MergeRequestChangesBuilderError> for Error {
+    fn from(value: MergeRequestChangesBuilderError) -> Self {
+        Self::BuilderError(value)
     }
 }
 

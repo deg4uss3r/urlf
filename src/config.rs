@@ -1,4 +1,3 @@
-use confy::ConfyError;
 use serde::{Deserialize, Serialize};
 
 use crate::error::Error;

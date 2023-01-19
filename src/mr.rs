@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, error::Error};
 
 use std::fmt;
 
@@ -94,7 +94,11 @@ fn diff_counter(diffs: Vec<Changes>) -> DiffCount {
     diff_count
 }
 
-pub(super) fn merge_request(config: &Config, number: u64, client: Option<&Gitlab>) -> String {
+pub(super) fn merge_request(
+    config: &Config,
+    number: u64,
+    client: Option<&Gitlab>,
+) -> Result<String, Error> {
     // TODO lookup via config
     // TODO safe parsing token
     // TODO Error handling
@@ -102,24 +106,27 @@ pub(super) fn merge_request(config: &Config, number: u64, client: Option<&Gitlab
         let mr_endpoint = MergeRequestChanges::builder()
             .project(config.repository.as_ref())
             .merge_request(number)
-            .build()
-            .unwrap();
+            .build()?;
+
         // Call the endpoint. The return type decides how to represent the value.
-        let mr: MergeRequestTester = mr_endpoint.query(client).unwrap();
-        format!(
+        let mr: MergeRequestTester = mr_endpoint
+            .query(client)
+            .map_err(|_| Error::EndPointError)?;
+
+        Ok(format!(
             "[{}]({}) `{}`",
             mr.title,
             mr.web_url,
             diff_counter(mr.changes)
-        )
+        ))
     } else {
-        format!(
+        Ok(format!(
             "[!{}]({})",
             number,
             format!(
                 "{}{}/merge_requests/{}",
                 config.base_url, config.repository, number
             )
-        )
+        ))
     }
 }

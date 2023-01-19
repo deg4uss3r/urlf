@@ -36,7 +36,7 @@ fn main() -> Result<(), Error> {
                     &config,
                     args.value_of("number").unwrap_or_default().parse()?,
                     gl_client.as_ref()
-                )
+                )?
             );
         }
         Some(("issue", args)) => {

@@ -73,7 +73,7 @@ pub(super) fn build() -> Command<'static> {
                 .arg(
                     Arg::new("api")
                         .long("api")
-                        .help("API key (read-only), this is not required you can prodive it during runtime")
+                        .help("API key (read-only)")
                         .required(false)
                         .takes_value(true),
                 )
