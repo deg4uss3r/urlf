@@ -20,9 +20,7 @@ fn main() -> Result<(), Error> {
 
     // use `ArgMatches::occurrences_of == 0` to check if the user provided this at runtime
     // the default config name is provided by the `cli` module (it's `default`)
-    // it is okay to unwrap here since it will either be `default` OR a user provided name OR
-    // a failure to parse the CLI flags given
-    let config_name = matches.value_of("cfg").unwrap();
+    let config_name = matches.value_of("cfg").ok_or(Error::InvalidArg)?;
 
     match matches.subcommand() {
         Some(("mr", args)) => {
@@ -34,7 +32,7 @@ fn main() -> Result<(), Error> {
                 "{}",
                 mr::merge_request(
                     &config,
-                    args.value_of("number").unwrap_or_default().parse()?,
+                    args.value_of("number")._or_default().parse()?,
                     gl_client.as_ref()
                 )?
             );
@@ -48,15 +46,15 @@ fn main() -> Result<(), Error> {
                 "{}",
                 issue::issue(
                     &config,
-                    args.value_of("number").unwrap().parse().unwrap(),
+                    args.value_of("number").ok_or(Error::InvalidArg)?.parse()?,
                     gl_client.as_ref()
-                )
+                )?
             );
         }
         Some(("config", args)) => {
-            let config_name = matches.value_of("cfg").unwrap();
-            let base_url = args.value_of("url").unwrap();
-            let repo = args.value_of("repo").unwrap();
+            let config_name = matches.value_of("cfg").ok_or(Error::InvalidArg)?;
+            let base_url = args.value_of("url").ok_or(Error::InvalidArg)?;
+            let repo = args.value_of("repo").ok_or(Error::InvalidArg)?;
             let api = args.value_of("api");
 
             // error reporting

@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, error::Error};
 
 use gitlab::{
     api::{projects::issues::Issue, Query},
@@ -12,21 +12,26 @@ struct IssueTester {
     web_url: String,
 }
 
-pub(super) fn issue(config: &Config, number: u64, client: Option<&Gitlab>) -> String {
+pub(super) fn issue(
+    config: &Config,
+    number: u64,
+    client: Option<&Gitlab>,
+) -> Result<String, Error> {
     if let Some(client) = client {
         let issue_endpoint = Issue::builder()
             .project(config.repository.as_ref())
             .issue(number)
-            .build()
-            .unwrap();
-        let issue: IssueTester = issue_endpoint.query(client).unwrap();
-        format!("[{}]({})", issue.title, issue.web_url)
+            .build()?;
+        let issue: IssueTester = issue_endpoint
+            .query(client)
+            .map_err(|_| Error::EndPointError)?;
+
+        Ok(format!("[{}]({})", issue.title, issue.web_url))
     } else {
-        //TODO take in config
-        format!(
+        Ok(format!(
             "[!{}]({})",
             number,
             format!("{}{}/issues/{}", config.base_url, config.repository, number)
-        )
+        ))
     }
 }

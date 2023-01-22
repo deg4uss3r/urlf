@@ -32,6 +32,7 @@ pub(crate) fn load(config_name: &str) -> Result<Config, Error> {
     match config {
         Ok(c) => Ok(c),
         Err(_) => {
+            eprintln!("Error: config not loaded using the default config");
             let c = Default::default();
             store(&c, config_name)?;
             Ok(c)

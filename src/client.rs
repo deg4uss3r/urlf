@@ -19,7 +19,7 @@ pub(crate) fn try_create_client(matches: &ArgMatches, config: &Config) -> Option
             // `unwrap_or_else` here so it's computed when needed
             // e.g. if there's an API key provided on the CLI we want this to pass
             // `unwrap_or` will cause this to fail because it will be computed at the same time
-            // \
+            //
             // The above `unwrap` is safe since we only compute it when the `api` is missing from the CLI
             // and check that the config has an API Key
         )
