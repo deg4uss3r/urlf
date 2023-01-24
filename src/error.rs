@@ -21,16 +21,47 @@ pub trait BuilderError {}
 impl BuilderError for MergeRequestChangesBuilderError {}
 impl BuilderError for IssueBuilderError {}
 
-// TODO proper Debug/Display for individual error types
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self)
+        match self {
+            Self::ConfigurationError(confy_error) => write!(
+                f,
+                "An error occured in the configuration framework: {}",
+                confy_error
+            ),
+            Error::ErrorParsingCliValue(parse_error) => write!(
+                f,
+                "An error occurred while trying to parse a number: {}",
+                parse_error
+            ),
+            Error::WriteError(io_error) => write!(f, "An error occurred when writing to a file or the terminal: {}", io_error),
+            Error::UnableToCreateClient(client_error) => write!(f, "Unable to create the GitLab client: {}", client_error),
+            Error::BuilderError(_) => write!(f, "An error occurred when trying to build a request to the GitLab endpoint."),
+            Error::EndPointError => write!(f, "An occur occurred from the endpoint, check your provided API key and try again."),
+            Error::InvalidArg => write!(f, "An error occurred with the provided arguments, try `--help` for possible arguments."),
+        }
     }
 }
 
 impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self)
+        match self {
+            Self::ConfigurationError(confy_error) => write!(
+                f,
+                "An error occured in the configuration framework: {}",
+                confy_error
+            ),
+            Error::ErrorParsingCliValue(parse_error) => write!(
+                f,
+                "An error occurred while trying to parse a number: {}",
+                parse_error
+            ),
+            Error::WriteError(io_error) => write!(f, "An error occurred when writing to a file or the terminal: {}", io_error),
+            Error::UnableToCreateClient(client_error) => write!(f, "Unable to create the GitLab client: {}", client_error),
+            Error::BuilderError(_) => write!(f, "An error occurred when trying to build a request to the GitLab endpoint."),
+            Error::EndPointError => write!(f, "An occur occurred from the endpoint, check your provided API key and try again."),
+            Error::InvalidArg => write!(f, "An error occurred with the provided arguments, try `--help` for possible arguments."),
+        }
     }
 }
 
