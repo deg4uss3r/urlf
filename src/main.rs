@@ -8,6 +8,8 @@ mod mr;
 use crate::client::try_create_client;
 use crate::error::Error;
 
+use confy::get_configuration_file_path;
+
 //TODO:
 // Errors
 // Anything else for issues/MRs?
@@ -32,7 +34,7 @@ fn main() -> Result<(), Error> {
                 "{}",
                 mr::merge_request(
                     &config,
-                    args.value_of("number")._or_default().parse()?,
+                    args.value_of("number").unwrap_or_default().parse()?,
                     gl_client.as_ref()
                 )?
             );
@@ -52,7 +54,32 @@ fn main() -> Result<(), Error> {
             );
         }
         Some(("config", args)) => {
+            // default value is defined in the cli module as "default" it will never error here
             let config_name = matches.value_of("cfg").ok_or(Error::InvalidArg)?;
+
+            if args.is_present("location") {
+                if std::fs::metadata(get_configuration_file_path(
+                    env!("CARGO_CRATE_NAME"),
+                    config_name,
+                )?)
+                .is_ok()
+                {
+                    println!(
+                        "\nConfig file is located at: {}",
+                        get_configuration_file_path(env!("CARGO_CRATE_NAME"), config_name)?
+                            .display()
+                    );
+                } else {
+                    eprintln!(
+                        "\nError: config files does not exist at this location: {}",
+                        get_configuration_file_path(env!("CARGO_CRATE_NAME"), config_name)?
+                            .display()
+                    )
+                }
+
+                return Ok(());
+            }
+
             let base_url = args.value_of("url").ok_or(Error::InvalidArg)?;
             let repo = args.value_of("repo").ok_or(Error::InvalidArg)?;
             let api = args.value_of("api");

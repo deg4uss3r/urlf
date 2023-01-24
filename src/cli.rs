@@ -57,17 +57,24 @@ pub(super) fn build() -> Command<'static> {
             Command::new("config")
                 .about("updates or creates a new config file")
                 .arg(
+                    Arg::new("location")
+                        .long("location")
+                        .help("prints the location of the default config file")
+                        .required(false)
+                        .takes_value(false)
+                )
+                .arg(
                     Arg::new("url")
                         .long("url")
                         .help("base url (e.g. gitlab.com)")
-                        .required(true)
+                        .required_unless_present("location")
                         .takes_value(true),
                 )
                 .arg(
                     Arg::new("repo")
                         .long("repo")
                         .help("repository to query (e.g. gitlab-org/gitlab)")
-                        .required(true)
+                        .required_unless_present("location")
                         .takes_value(true),
                 )
                 .arg(
